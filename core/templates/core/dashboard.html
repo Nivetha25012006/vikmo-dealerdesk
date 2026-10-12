@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VIKMO DealerDesk</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #38bdf8;
+      --primary-hover: #0284c7;
+      --accent: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar Navigation */
+    nav.sidebar {
+      width: 250px;
+      background: #090d16;
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand span { color: #f8fafc; }
+
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.95rem;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      background: var(--card-bg);
+      color: var(--text);
+    }
+    .nav-btn.active {
+      background: var(--primary);
+      color: #0f172a;
+      font-weight: 600;
+    }
+
+    /* Main Container */
+    main.content {
+      flex: 1;
+      padding: 32px 40px;
+      overflow-y: auto;
+    }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Cards & Grids */
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-bottom: 32px;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .metric-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+    .metric-val {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* Tables */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      background: #151f30;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Forms & Inputs */
+    .search-bar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    input, select, button {
+      font-family: inherit;
+    }
+    input[type="text"], input[type="number"], select {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+    }
+    button.btn {
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      padding: 10px 18px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button.btn:hover { background: var(--primary-hover); }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 6px;
+    }
+    .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+    .badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .badge-info { background: rgba(56, 189, 248, 0.2); color: #38bdf8; }
+
+    /* Assistant Chat UI */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .chat-msg {
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+    .msg-user {
+      align-self: flex-end;
+      background: var(--primary);
+      color: #0f172a;
+      border-bottom-right-radius: 2px;
+    }
+    .msg-assistant {
+      align-self: flex-start;
+      background: #273549;
+      color: var(--text);
+      border-bottom-left-radius: 2px;
+    }
+    .tool-box {
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+      color: #94a3b8;
+    }
+    .chat-input-bar {
+      display: flex;
+      gap: 12px;
+      padding: 16px;
+      background: #151f30;
+      border-top: 1px solid var(--border);
+    }
+    .chat-input-bar input {
+      flex: 1;
+    }
+
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      margin-right: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="sidebar">
+    <div class="brand">
+      <span class="status-indicator"></span>
+      VIKMO <span>DealerDesk</span>
+    </div>
+    <button class="nav-btn active" onclick="showTab('dashboard')">Dashboard</button>
+    <button class="nav-btn" onclick="showTab('catalogue')">Product Catalogue</button>
+    <button class="nav-btn" onclick="showTab('assistant')">Dealer Assistant (AI)</button>
+    <button class="nav-btn" onclick="showTab('forecast')">Demand Forecast</button>
+    <button class="nav-btn" onclick="showTab('reorder')">Reorder Suggestions</button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="content">
+
+    <!-- Section 1: Dashboard -->
+    <div id="section-dashboard" class="section active">
+      <h2>Overview & System Health</h2>
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-title">Catalogue Products</div>
+          <div id="dash-products-count" class="metric-val">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Authorized Dealers</div>
+          <div id="dash-dealers-count" class="metric-val">-</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">Forecasted SKUs</div>
+          <div class="metric-val">40</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-title">API Status</div>
+          <div class="metric-val" style="color: #34d399;">ONLINE</div>
+        </div>
+      </div>
+
+      <h2>Recent Catalogue Snapshot</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Product Name</th>
+              <th>Category</th>
+              <th>Vehicle Fitment</th>
+              <th>Price (₹)</th>
+              <th>Live Stock</th>
+            </tr>
+          </thead>
+          <tbody id="dash-recent-products">
+            <tr><td colspan="6" style="text-align: center;">Loading catalogue data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 2: Product Catalogue -->
+    <div id="section-catalogue" class="section">
+      <h2>Product Catalogue & Live Stock</h2>
+      <div class="search-bar">
+        <input type="text" id="cat-search" placeholder="Search by SKU, Name or Brand..." style="width: 280px;" onkeydown="if(event.key==='Enter') loadCatalogue()">
+        <input type="text" id="cat-vehicle" placeholder="Vehicle model (e.g. KTM Duke 390)" style="width: 240px;" onkeydown="if(event.key==='Enter') loadCatalogue()">
+        <button class="btn" onclick="loadCatalogue()">Search Catalogue</button>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Brand</th>
+              <th>Vehicle Fitment</th>
+              <th>Price (₹)</th>
+              <th>Live Stock</th>
+            </tr>
+          </thead>
+          <tbody id="catalogue-tbody">
+            <tr><td colspan="7" style="text-align: center;">Click search or load to display products.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 3: Dealer Assistant -->
+    <div id="section-assistant" class="section">
+      <h2>Dealer Assistant (GenAI Tool-Calling)</h2>
+      <div style="margin-bottom: 12px; display: flex; gap: 16px; align-items: center;">
+        <span style="color: var(--text-muted); font-size: 0.9rem;">Session ID: <strong id="chat-session-display" style="color: var(--primary);"></strong></span>
+        <label style="color: var(--text-muted); font-size: 0.9rem;">Dealer ID:
+          <input type="number" id="chat-dealer-id" value="1" style="width: 70px; padding: 4px 8px;">
+        </label>
+      </div>
+
+      <div class="chat-container">
+        <div id="chat-box" class="chat-messages">
+          <div class="chat-msg msg-assistant">
+            Hello! I am your VIKMO DealerDesk AI Assistant. How can I help you today? You can ask me to find spare parts, check live warehouse stock and pricing, or create draft orders.
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <input type="text" id="chat-input" placeholder="e.g. Do you have brake pads for a Pulsar 150?" onkeydown="if(event.key==='Enter') sendChatMessage()">
+          <button class="btn" onclick="sendChatMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: Demand Forecast -->
+    <div id="section-forecast" class="section">
+      <h2>4-Week Demand Forecast</h2>
+      <div class="search-bar">
+        <select id="forecast-sku-select" style="width: 250px;">
+          <option value="">Select a forecast SKU...</option>
+        </select>
+        <button class="btn" onclick="loadForecastForSku()">View Forecast</button>
+      </div>
+
+      <div class="table-container" style="max-width: 600px;">
+        <table>
+          <thead>
+            <tr>
+              <th>Week Start</th>
+              <th>Forecasted Demand (Units)</th>
+            </tr>
+          </thead>
+          <tbody id="forecast-tbody">
+            <tr><td colspan="2" style="text-align: center;">Select a SKU above to view forecast.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Section 5: Reorder Suggestions -->
+    <div id="section-reorder" class="section">
+      <h2>Reorder Suggestions (Contract Section 10)</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+        Real-time reorder quantities calculated from forecast lead-time demand, sample standard deviation (σ), lead time (L), and live database stock.
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>SKU</th>
+              <th>Live Stock</th>
+              <th>Lead Time (wks)</th>
+              <th>Lead Time Demand</th>
+              <th>Safety Stock</th>
+              <th>Reorder Point</th>
+              <th>Recommended Reorder Qty</th>
+            </tr>
+          </thead>
+          <tbody id="reorder-tbody">
+            <tr><td colspan="7" style="text-align: center;">Loading reorder suggestions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    let currentSessionId = "session-" + Math.random().toString(36).substring(2, 9);
+    document.getElementById("chat-session-display").innerText = currentSessionId;
+
+    function showTab(tab) {
+      document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+      event.target.classList.add("active");
+      document.getElementById("section-" + tab).classList.add("active");
+
+      if (tab === "catalogue") loadCatalogue();
+      if (tab === "reorder") loadReorderSuggestions();
+      if (tab === "forecast") populateForecastSkus();
+    }
+
+    // Dashboard Data
+    async function loadDashboard() {
+      try {
+        const prodRes = await fetch("/api/products/?page_size=5");
+        const prodData = await prodRes.json();
+        document.getElementById("dash-products-count").innerText = prodData.count || 600;
+
+        const dealerRes = await fetch("/api/dealers/?page_size=1");
+        const dealerData = await dealerRes.json();
+        document.getElementById("dash-dealers-count").innerText = dealerData.count || 25;
+
+        const tbody = document.getElementById("dash-recent-products");
+        tbody.innerHTML = (prodData.results || []).map(p => `
+          <tr>
+            <td><strong>${p.sku}</strong></td>
+            <td>${p.name}</td>
+            <td>${p.category}</td>
+            <td>${p.vehicle_fitment}</td>
+            <td>₹${p.price}</td>
+            <td><span class="badge ${p.stock > 10 ? 'badge-success' : 'badge-danger'}">${p.stock} units</span></td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Catalogue
+    async function loadCatalogue() {
+      const q = document.getElementById("cat-search").value;
+      const v = document.getElementById("cat-vehicle").value;
+      let url = "/api/products/?page_size=20";
+      if (q) url += "&search=" + encodeURIComponent(q);
+      if (v) url += "&vehicle=" + encodeURIComponent(v);
+
+      const tbody = document.getElementById("catalogue-tbody");
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Loading products...</td></tr>`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        if (!data.results || data.results.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">No matching products found.</td></tr>`;
+          return;
+        }
+        tbody.innerHTML = data.results.map(p => `
+          <tr>
+            <td><strong>${p.sku}</strong></td>
+            <td>${p.name}</td>
+            <td>${p.category}</td>
+            <td>${p.brand}</td>
+            <td>${p.vehicle_fitment}</td>
+            <td>₹${p.price}</td>
+            <td><span class="badge ${p.stock > 10 ? 'badge-success' : 'badge-danger'}">${p.stock} units</span></td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="7" style="color: red; text-align: center;">Error loading catalogue.</td></tr>`;
+      }
+    }
+
+    // Assistant Chat
+    async function sendChatMessage() {
+      const input = document.getElementById("chat-input");
+      const msg = input.value.trim();
+      if (!msg) return;
+
+      const chatBox = document.getElementById("chat-box");
+      chatBox.innerHTML += `<div class="chat-msg msg-user">${msg}</div>`;
+      input.value = "";
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const dealerId = parseInt(document.getElementById("chat-dealer-id").value) || 1;
+
+      try {
+        const res = await fetch("/api/assistant/chat/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: currentSessionId,
+            dealer_id: dealerId,
+            message: msg
+          })
+        });
+        const data = await res.json();
+
+        let toolCallsHtml = "";
+        if (data.tool_calls && data.tool_calls.length > 0) {
+          toolCallsHtml = `<div class="tool-box">🛠 Tools called: ${data.tool_calls.map(t => `<code>${t.name}</code>`).join(", ")}</div>`;
+        }
+
+        chatBox.innerHTML += `
+          <div class="chat-msg msg-assistant">
+            ${data.reply || "No reply"}
+            ${toolCallsHtml}
+          </div>
+        `;
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch (e) {
+        chatBox.innerHTML += `<div class="chat-msg msg-assistant" style="color: red;">Error communicating with assistant.</div>`;
+      }
+    }
+
+    // Reorder Suggestions
+    async function loadReorderSuggestions() {
+      const tbody = document.getElementById("reorder-tbody");
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center;">Calculating live reorder suggestions...</td></tr>`;
+
+      try {
+        const res = await fetch("/api/reorder-suggestions/");
+        const data = await res.json();
+        tbody.innerHTML = (data.results || []).map(r => `
+          <tr>
+            <td><strong>${r.sku}</strong></td>
+            <td>${r.current_stock}</td>
+            <td>${r.lead_time_weeks}</td>
+            <td>${r.lead_time_demand}</td>
+            <td>${r.safety_stock}</td>
+            <td>${r.reorder_point}</td>
+            <td><strong style="color: ${r.reorder_qty > 0 ? '#f59e0b' : '#34d399'}">${r.reorder_qty}</strong></td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="7" style="color: red; text-align: center;">Error loading reorder suggestions.</td></tr>`;
+      }
+    }
+
+    // Forecast SKUs
+    async function populateForecastSkus() {
+      const select = document.getElementById("forecast-sku-select");
+      if (select.children.length > 1) return;
+
+      try {
+        const res = await fetch("/api/reorder-suggestions/");
+        const data = await res.json();
+        (data.results || []).forEach(r => {
+          const opt = document.createElement("option");
+          opt.value = r.sku;
+          opt.innerText = r.sku;
+          select.appendChild(opt);
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadForecastForSku() {
+      const sku = document.getElementById("forecast-sku-select").value;
+      if (!sku) return;
+
+      const tbody = document.getElementById("forecast-tbody");
+      tbody.innerHTML = `<tr><td colspan="2" style="text-align: center;">Loading forecast...</td></tr>`;
+
+      try {
+        const res = await fetch(`/api/forecast/${sku}/`);
+        const data = await res.json();
+        tbody.innerHTML = (data.forecast || []).map(f => `
+          <tr>
+            <td><strong>${f.week_start}</strong></td>
+            <td>${f.forecast_units}</td>
+          </tr>
+        `).join("");
+      } catch (e) {
+        tbody.innerHTML = `<tr><td colspan="2" style="color: red; text-align: center;">Error loading forecast for SKU.</td></tr>`;
+      }
+    }
+
+    // Init
+    loadDashboard();
+  </script>
+</body>
+</html>
