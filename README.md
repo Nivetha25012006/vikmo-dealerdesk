@@ -4,7 +4,7 @@
 **Submission:** Complete implementation of Backend Core, Dealer Assistant (GenAI with Tool Calling), Demand Forecasting & Reorder Suggestions (ML), Automated Test Suite, and Dealer Portal Frontend UI.
 
 - **Public Repository Link:** `https://github.com/Nivetha25012006/vikmo-dealerdesk`
-- **5-Minute Video Walkthrough:** `https://youtu.be/placeholder-video-link` *(Unlisted YouTube / Loom link)*
+
 
 ---
 
